@@ -1,0 +1,20 @@
+from enum import Enum
+
+class Phase(str, Enum):
+    INTRO = "INTRO"
+    CASE_PROMPTING = "CASE_PROMPTING"
+    STRUCTURE_CHECK = "STRUCTURE_CHECK"
+    DRIVER_ANALYSIS = "DRIVER_ANALYSIS"
+    MATH_DRILL = "MATH_DRILL"
+    SYNTHESIS = "SYNTHESIS"
+    FEEDBACK = "FEEDBACK"
+    
+PHASE_ORDER = [
+    Phase.INTRO,
+    Phase.CASE_PROMPTING,
+    Phase.STRUCTURE_CHECK,
+    Phase.DRIVER_ANALYSIS,
+    Phase.MATH_DRILL,
+    Phase.SYNTHESIS,
+    Phase.FEEDBACK,
+]

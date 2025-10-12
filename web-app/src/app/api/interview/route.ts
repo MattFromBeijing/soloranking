@@ -14,7 +14,7 @@ if (!LIVEKIT_API_KEY || !LIVEKIT_API_SECRET || !LIVEKIT_URL) {
 export async function POST(request: NextRequest) {
     try {
         const body = await request.json();
-        const { roomName, participantName, participantIdentity } = body;
+        const { roomName, participantName, participantIdentity, uploadResult } = body;
 
         if (!roomName || !participantName) {
             return NextResponse.json(
@@ -37,6 +37,7 @@ export async function POST(request: NextRequest) {
             canSubscribe: true,
             canPublishData: true,
         });
+        token.metadata = JSON.stringify({ uploadResult })
 
         const jwt = await token.toJwt();
 

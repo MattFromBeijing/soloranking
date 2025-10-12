@@ -16,10 +16,11 @@ import '@livekit/components-styles';
 interface InterviewRoomProps {
   roomName: string;
   participantName: string;
+  uploadResult?: any;
   onLeave?: () => void;
 }
 
-export default function InterviewRoom({ roomName, participantName, onLeave }: InterviewRoomProps) {
+export default function InterviewRoom({ roomName, participantName, uploadResult, onLeave }: InterviewRoomProps) {
   const [token, setToken] = useState<string>('');
   const [wsUrl, setWsUrl] = useState<string>('');
   const [loading, setLoading] = useState(true);
@@ -37,6 +38,7 @@ export default function InterviewRoom({ roomName, participantName, onLeave }: In
             roomName,
             participantName,
             participantIdentity: participantName.toLowerCase().replace(/\s+/g, '-'),
+            uploadResult,
           }),
         });
 
@@ -55,7 +57,7 @@ export default function InterviewRoom({ roomName, participantName, onLeave }: In
     };
 
     generateToken();
-  }, [roomName, participantName]);
+  }, [roomName, participantName, uploadResult]);
 
   if (loading) {
     return (

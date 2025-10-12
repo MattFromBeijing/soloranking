@@ -86,18 +86,25 @@ class ExtractorService:
                 "Ensure the document contains clear question prompts."
             )
 
-        phases: Dict[str, Dict[str, List[str]]] = {}
+        phases: Dict[str, Dict[str, Any]] = {}
         used_keys: set[str] = set()
         for idx, question in enumerate(questions, start=1):
             phase_key = self._generate_phase_name(question, idx, used_keys)
             used_keys.add(phase_key)
             phases[phase_key] = {
-                "Q": question,
-                "R": self._build_rubric(question),
+                "name": phase_key,
+                "question": question,
+                "rubric": self._build_rubric(question),
             }
 
-        case = Case(phases)
-        case.case_description = description
+        # Create the standardized case data structure
+        case_data = {
+            "case_description": description,
+            "phase_order": list(phases.keys()),
+            "phases": phases
+        }
+
+        case = Case(case_data)
 
         self.cache[case_id] = {
             "fingerprint": fingerprint,
@@ -140,8 +147,21 @@ class ExtractorService:
 
         description_parts: List[str] = []
         questions: List[str] = []
+        case_description = ""
 
+        # First, look for case description/prompt in early blocks
+        for i, block in enumerate(blocks[:5]):  # Check first 5 blocks for prompt
+            if self._is_case_description_block(block):
+                case_description = self._extract_case_description(block)
+                # Remove this block from further processing
+                blocks[i] = ""
+                break
+
+        # Process remaining blocks for questions and additional description
         for block in blocks:
+            if not block.strip():  # Skip empty blocks
+                continue
+                
             if self._block_is_question(block):
                 extracted = self._extract_questions_from_block(block)
                 if extracted:
@@ -149,12 +169,16 @@ class ExtractorService:
                 elif questions:
                     questions[-1] = f"{questions[-1]} {block}".strip()
                 else:
-                    description_parts.append(block)
+                    # If no case description found yet, add to description
+                    if not case_description:
+                        description_parts.append(block)
             else:
                 if questions:
                     questions[-1] = f"{questions[-1]} {block}".strip()
                 else:
-                    description_parts.append(block)
+                    # If no case description found yet, add to description
+                    if not case_description:
+                        description_parts.append(block)
 
         if not questions:
             # Fallback: attempt to split entire text into questions via '?'.
@@ -165,7 +189,8 @@ class ExtractorService:
             ]
             questions.extend(fallback)
 
-        description = " ".join(description_parts).strip()
+        # Use case description if found, otherwise fall back to collected description parts
+        description = case_description if case_description else " ".join(description_parts).strip()
         return description, questions
 
     def _block_is_question(self, block: str) -> bool:
@@ -184,6 +209,71 @@ class ExtractorService:
             return True
 
         return False
+
+    def _is_case_description_block(self, block: str) -> bool:
+        """Return True if a block appears to contain the main case description/prompt."""
+        lowered = block.lower()
+        
+        # Look for explicit prompt indicators
+        prompt_indicators = [
+            "prompt:",
+            "case prompt:",
+            "prompt",
+            "case description:",
+            "case:",
+            "scenario:",
+            "background:",
+            "situation:",
+            "your client",
+            "client situation"
+        ]
+        
+        # Check if block starts with or contains prompt indicators
+        for indicator in prompt_indicators:
+            if lowered.startswith(indicator) or f"\n{indicator}" in lowered:
+                return True
+        
+        # Look for typical case description patterns
+        case_patterns = [
+            r"your client is",
+            r"the client is",
+            r"you have been hired",
+            r"you are working with",
+            r"a company",
+            r"the company",
+            r"ceo has asked",
+            r"management team"
+        ]
+        
+        for pattern in case_patterns:
+            if re.search(pattern, lowered):
+                # Additional check: should be substantial text (not just a question)
+                if len(block.split()) > 20 and not block.strip().endswith('?'):
+                    return True
+        
+        return False
+
+    def _extract_case_description(self, block: str) -> str:
+        """Extract and clean the case description from a block."""
+        # Remove common prompt prefixes
+        prefixes_to_remove = [
+            r"prompt:\s*",
+            r"case prompt:\s*", 
+            r"case description:\s*",
+            r"case:\s*",
+            r"scenario:\s*",
+            r"background:\s*",
+            r"situation:\s*"
+        ]
+        
+        cleaned = block
+        for prefix in prefixes_to_remove:
+            cleaned = re.sub(prefix, "", cleaned, flags=re.IGNORECASE)
+        
+        # Clean up whitespace
+        cleaned = self._collapse_whitespace(cleaned)
+        
+        return cleaned.strip()
 
     def _extract_questions_from_block(self, block: str) -> List[str]:
         """Break a text block into individual, cleaned question strings."""

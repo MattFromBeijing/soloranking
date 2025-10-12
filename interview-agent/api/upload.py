@@ -1,6 +1,7 @@
 from flask import Blueprint, request, jsonify
 from services.RAGService import RAGService
 from services.ExtractorService import ExtractorService
+import os
 
 upload_bp = Blueprint('upload', __name__)
 
@@ -24,23 +25,26 @@ def upload_pdf():
         # Read PDF content
         pdf_content = file.read()
         
+        print(f"Read PDF content, size: {len(pdf_content)} bytes")
+        
         # Create Case object using ExtractorService
         case = extractor_service.create_case_from_pdf(case_id, pdf_content)
         
+        print(f"Extracted case from PDF")
+        
         # Create vector embeddings using RAGService
         chunks_created = rag_service.create_from_pdf(case_id, pdf_content)
-        
+
+        print(f"Created RAG vector store from PDF")
+
         # Get case info for response
         phases = list(case.phases.keys())
         description = getattr(case, 'case_description', 'No description available')
         
         return jsonify({
-            'message': 'PDF processed successfully',
             'case_id': case_id,
-            'case_data': case,
-            'chunks_created': chunks_created,
-            'phases_found': len(phases),
-            'description_preview': description[:200] + '...' if len(description) > 200 else description
+            'vs_dir': os.getenv("VECTOR_STORE_DIR", "./vector_store"),
+            'case_data': case.to_dict(),  # Convert to dictionary for JSON serialization
         })
         
     except Exception as e:

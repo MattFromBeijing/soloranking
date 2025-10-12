@@ -1,7 +1,6 @@
 # rag_store.py
 import faiss, pickle, numpy as np
 import dotenv
-import os
 from openai import OpenAI
 
 dotenv.load_dotenv()
@@ -32,3 +31,7 @@ class RAGService:
         for idx in I[0]:
             out.append(chunks[idx])
         return out
+
+    def remove(self, case_id: str):
+        if case_id in self.cache:
+            del self.cache[case_id]

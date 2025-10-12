@@ -3,7 +3,7 @@ from typing import Dict, Any
 from livekit.agents.llm import function_tool
 from livekit.agents import Agent
 from services.RAGService import RAGService
-from utils.Case import Case
+from models.Case import Case
 import json
 import openai
 from datetime import datetime

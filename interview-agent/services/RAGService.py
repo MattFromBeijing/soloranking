@@ -1,6 +1,10 @@
 # rag_store.py
 import faiss, pickle, numpy as np
+import dotenv
+import os
 from openai import OpenAI
+
+dotenv.load_dotenv()
 
 client = OpenAI()
 EMBED_MODEL = "text-embedding-3-small"

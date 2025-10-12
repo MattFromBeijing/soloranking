@@ -1,3 +1,5 @@
-*.env.local
+*.env
 *venv/
 *.DS_Store
+*vector_store/
+*__pycache__/

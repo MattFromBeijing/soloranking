@@ -1,11 +1,12 @@
 import logging
-from typing import Dict, Any, Optional
-from livekit.agents.llm import function_tool, RunContext
+from typing import Dict, Any
+from livekit.agents.llm import function_tool
 from livekit.agents import Agent
 from services.RAGService import RAGService
 from utils.Case import Case
 import json
 import openai
+from datetime import datetime
 
 logger = logging.getLogger("case-interview-agent")
 
@@ -28,7 +29,7 @@ class CaseInterviewAgent(Agent):
 ########## Context Tool Functions ##########
 
     @function_tool
-    async def evaluate_response(self, context: RunContext, user_response: str) -> str:
+    async def evaluate_response(self, user_response: str) -> str:
         """Evaluate user's response against current phase rubric using case facts"""
         try:
             phase = self.case.get_phase(self.current_phase)
@@ -104,7 +105,7 @@ class CaseInterviewAgent(Agent):
                 "improvement_areas": evaluation_data.get("improvement_areas", []),
                 "specific_feedback": evaluation_data.get("specific_feedback", ""),
                 "case_facts_used": case_facts,
-                "timestamp": context.current_time if hasattr(context, 'current_time') else "now"
+                "timestamp": datetime.now().isoformat()
             }
             
             self.evaluation_history[self.current_phase] = evaluation
@@ -129,7 +130,7 @@ class CaseInterviewAgent(Agent):
             return self._handle_error(f"Error retrieving case facts: {e}")
 
     @function_tool
-    async def provide_coaching(self, context: RunContext) -> str:
+    async def provide_coaching(self) -> str:
         """Provide coaching feedback without advancing phase"""
         try:
             evaluation = self.evaluation_history.get(self.current_phase)
@@ -212,7 +213,7 @@ class CaseInterviewAgent(Agent):
 ########## State Transition Tool Functions ##########
 
     @function_tool
-    async def decide_next_action(self, context: RunContext) -> None:
+    async def decide_next_action(self) -> None:
         """Decide whether to advance phase or stay and coach, then execute the action"""
         try:
             evaluation = self.evaluation_history.get(self.current_phase)
@@ -223,15 +224,15 @@ class CaseInterviewAgent(Agent):
                 # Check if there's a next phase
                 next_phase = self.case.get_next_phase(self.current_phase)
                 if next_phase:
-                    await self.advance_to_next_phase(context)
+                    await self.advance_to_next_phase()
                 else:
-                    await self.end_interview(context)
-                
+                    await self.end_interview()
+
         except Exception as e:
             self._handle_error(f"Error in decision making: {e}")
 
     @function_tool
-    async def advance_to_next_phase(self, context: RunContext) -> None:
+    async def advance_to_next_phase(self) -> None:
         """Advance to next phase and update agent instructions"""
         try:
             evaluation = self.evaluation_history.get(self.current_phase)
@@ -259,7 +260,7 @@ class CaseInterviewAgent(Agent):
             self.instructions = "The interview has concluded. Thank the user for their participation and end the session."
         except Exception as e:
             self._handle_error(f"Error ending interview: {e}")
-        
+
 ########## Helper Methods ##########
 
     def _get_initial_instructions(self) -> str:

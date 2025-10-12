@@ -81,29 +81,6 @@ def get_agent_configuration():
         "phases_data": get_case_phases()
     }
 
-
-class Assistant(Agent):
-    def __init__(self) -> None:
-        super().__init__(
-            instructions="""You are an AI case interview assistant conducting a management consulting case interview. You are professional, friendly, and thorough.
-
-            Your role is to:
-            - Guide candidates through structured case interview phases
-            - Evaluate responses against specific rubrics
-            - Provide coaching and feedback to help candidates improve
-            - Ask clarifying questions when needed
-            - Maintain a supportive but professional consulting tone throughout
-            
-            Case Interview Guidelines:
-            - Start by greeting the candidate and presenting the case prompt
-            - Guide them through framework development, analysis, and recommendations
-            - Evaluate each phase before moving to the next
-            - Provide constructive feedback and coaching when needed
-            - Keep responses conversational and encouraging
-            
-            Keep your responses concise and natural, as if you're having a real consulting case interview.""",
-        )
-
 def prewarm(proc: JobProcess):
     proc.userdata["vad"] = silero.VAD.load()
 
@@ -115,7 +92,7 @@ async def entrypoint(ctx: JobContext):
     }
 
     # Get agent configuration
-    # Move into JobContext in production
+    # Retrieve config from ctx in the future
     config = get_agent_configuration()
     
     # Initialize the case interview agent
@@ -128,8 +105,6 @@ async def entrypoint(ctx: JobContext):
         logger.info(f"Initialized CaseInterviewAgent with case_id: {config['case_id']}")
     except Exception as e:
         logger.error(f"Failed to initialize CaseInterviewAgent: {e}")
-        # Fallback to basic assistant
-        case_agent = Assistant()
 
     # Set up a voice AI with OpenAI Realtime API
     session = AgentSession(

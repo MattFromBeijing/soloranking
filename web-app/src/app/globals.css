@@ -24,3 +24,72 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Custom LiveKit Component Styling */
+.lk-room-container {
+  background: transparent !important;
+}
+
+.lk-video-conference {
+  background: transparent !important;
+  height: 100% !important;
+}
+
+.lk-video-conference-inner {
+  height: 100% !important;
+  background: transparent !important;
+}
+
+.lk-grid-layout-wrapper,
+.lk-focus-layout-wrapper {
+  background: transparent !important;
+  border-radius: 0.5rem;
+  overflow: hidden;
+}
+
+.lk-participant-tile {
+  border-radius: 0.5rem !important;
+  overflow: hidden !important;
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06) !important;
+}
+
+.lk-control-bar {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 0.75rem !important;
+  margin: 1rem !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+  border: 1px solid rgba(229, 231, 235, 0.5) !important;
+}
+
+.lk-button {
+  border-radius: 0.5rem !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.lk-button:hover {
+  transform: scale(1.05) !important;
+}
+
+.lk-button.lk-button-danger {
+  background-color: #dc2626 !important;
+}
+
+.lk-button.lk-button-danger:hover {
+  background-color: #b91c1c !important;
+}
+
+.lk-chat {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 0.75rem !important;
+  border: 1px solid rgba(229, 231, 235, 0.5) !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05) !important;
+}
+
+.lk-connection-status {
+  background: rgba(255, 255, 255, 0.95) !important;
+  backdrop-filter: blur(10px) !important;
+  border-radius: 0.5rem !important;
+  border: 1px solid rgba(229, 231, 235, 0.5) !important;
+}

@@ -11,6 +11,7 @@ import {
   useTracks,
 } from '@livekit/components-react';
 import { Track } from 'livekit-client';
+import '@livekit/components-styles';
 
 interface InterviewRoomProps {
   roomName: string;
@@ -58,10 +59,11 @@ export default function InterviewRoom({ roomName, participantName, onLeave }: In
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-blue-600 mb-4"></div>
-          <p className="text-lg">Connecting to interview room...</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl p-8 text-center">
+          <div className="animate-spin rounded-full h-16 w-16 border-b-2 border-blue-600 mb-4 mx-auto"></div>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Connecting to Interview Room</h2>
+          <p className="text-gray-600">Please wait while we set up your video conference...</p>
         </div>
       </div>
     );
@@ -69,15 +71,20 @@ export default function InterviewRoom({ roomName, participantName, onLeave }: In
 
   if (error) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center text-red-600">
-          <h2 className="text-xl font-bold mb-2">Connection Error</h2>
-          <p className="mb-4">{error}</p>
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-xl p-8 text-center max-w-md w-full">
+          <div className="text-red-600 mb-4">
+            <svg className="mx-auto h-12 w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 18.5c-.77.833.192 2.5 1.732 2.5z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-bold text-gray-900 mb-2">Connection Error</h2>
+          <p className="text-gray-600 mb-6">{error}</p>
           <button
             onClick={onLeave}
-            className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
           >
-            Go Back
+            Go Back to Home
           </button>
         </div>
       </div>
@@ -85,28 +92,52 @@ export default function InterviewRoom({ roomName, participantName, onLeave }: In
   }
 
   return (
-    <div className="h-screen w-full">
-      <LiveKitRoom
-        video={true}
-        audio={true}
-        token={token}
-        serverUrl={wsUrl}
-        data-lk-theme="default"
-        style={{ height: '100vh' }}
-        onDisconnected={onLeave}
-      >
-        {/* Interview Room Header */}
-        <div className="absolute top-4 left-4 z-10 bg-black bg-opacity-50 text-white px-3 py-2 rounded">
-          <h3 className="font-semibold">Interview: {roomName}</h3>
-          <p className="text-sm">Participant: {participantName}</p>
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+      {/* Header with room info and controls */}
+      <div className="bg-white shadow-sm border-b">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              <h1 className="text-xl font-semibold text-gray-900">
+                Interview: {roomName}
+              </h1>
+              <div className="ml-4 text-sm text-gray-600">
+                Participant: {participantName}
+              </div>
+            </div>
+            <button
+              onClick={onLeave}
+              className="bg-red-600 text-white px-4 py-2 rounded-md hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 transition-colors"
+            >
+              Leave Room
+            </button>
+          </div>
         </div>
+      </div>
 
-        {/* Main Video Conference */}
-        <VideoConference />
-        
-        {/* Audio renderer for participants */}
-        <RoomAudioRenderer />
-      </LiveKitRoom>
+      {/* Video Conference Container */}
+      <div className="flex-1 p-4">
+        <div className="max-w-7xl mx-auto">
+          <div className="bg-white rounded-lg shadow-xl overflow-hidden" style={{ height: 'calc(100vh - 120px)' }}>
+            <LiveKitRoom
+              video={true}
+              audio={true}
+              token={token}
+              serverUrl={wsUrl}
+              data-lk-theme="default"
+              style={{ height: '100%' }}
+              onDisconnected={onLeave}
+              className="lk-room-container"
+            >
+              {/* Custom styled video conference */}
+              <div className="h-full relative">
+                <VideoConference />
+                <RoomAudioRenderer />
+              </div>
+            </LiveKitRoom>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }

@@ -1,5 +1,5 @@
 """
-Simple test script to validate the CaseInterviewAgent setup
+Simple test script to validate the CaseAgent setup
 """
 import os
 import sys
@@ -9,7 +9,7 @@ from typing import Dict, Any
 # Add the project root to Python path
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
 
-from agents.CaseInterviewAgent import CaseInterviewAgent
+from agents.CaseAgent import CaseAgent
 from services.RAGService import RAGService
 
 # Configure logging
@@ -46,13 +46,13 @@ def test_agent_initialization():
         phases_data = get_sample_phases()
         
         # Initialize agent
-        agent = CaseInterviewAgent(
+        agent = CaseAgent(
             case_id=case_id,
             vs_dir=vs_dir,
             phases_data=phases_data
         )
         
-        logger.info("✅ CaseInterviewAgent initialized successfully")
+        logger.info("✅ CaseAgent initialized successfully")
         logger.info(f"Current phase: {agent.current_phase}")
         logger.info(f"Phase order: {agent.case.phase_order}")
         
@@ -83,7 +83,7 @@ def test_rag_service():
         return True  # This is expected for now
 
 if __name__ == "__main__":
-    logger.info("🚀 Testing CaseInterviewAgent setup...")
+    logger.info("🚀 Testing CaseAgent setup...")
     
     # Run tests
     agent_ok = test_agent_initialization()

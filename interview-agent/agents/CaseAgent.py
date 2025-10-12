@@ -8,13 +8,13 @@ import json
 import openai
 from datetime import datetime
 
-logger = logging.getLogger("case-interview-agent")
+logger = logging.getLogger("case-agent")
 
-class CaseInterviewAgent(Agent):
-    def __init__(self, case_id: str, vs_dir: str, phases_data: Dict[str, Dict[str, Any]]):
+class CaseAgent(Agent):
+    def __init__(self, case_id: str, vs_dir: str, case_data: Dict[str, Dict[str, Any]]):
         self.case_id = case_id
         self.rag_service = RAGService(vs_dir)
-        self.case = Case(phases_data)
+        self.case = Case(case_data)
         self.openai_client = openai.OpenAI()
         
         # State tracking

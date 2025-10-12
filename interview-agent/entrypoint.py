@@ -14,14 +14,14 @@ from livekit.agents import (
 )
 from livekit.plugins import openai
 from livekit.plugins import noise_cancellation, silero
-from agents.CaseInterviewAgent import CaseInterviewAgent
+from agents.CaseAgent import CaseAgent
 
 logger = logging.getLogger("agent")
 
 load_dotenv(".env.local")
 
 
-def get_case_phases() -> dict:
+def get_case() -> dict:
     """Sample case phases - in production, this would come from your case generation service"""
     return {
         "case_and_framework": {
@@ -77,7 +77,7 @@ def get_agent_configuration():
     return {
         "case_id": os.getenv("CASE_ID", "retail_case_001"),
         "vs_dir": os.getenv("VECTOR_STORE_DIR", "./vector_store"),
-        "phases_data": get_case_phases()
+        "case_data": get_case()
     }
 
 def prewarm(proc: JobProcess):
@@ -93,17 +93,17 @@ async def entrypoint(ctx: JobContext):
     # Get agent configuration
     # Retrieve config from ctx in the future
     config = get_agent_configuration()
-    
-    # Initialize the case interview agent
+
+    # Initialize the case agent
     try:
-        case_agent = CaseInterviewAgent(
+        case_agent = CaseAgent(
             case_id=config["case_id"],
             vs_dir=config["vs_dir"], 
-            phases_data=config["phases_data"]
+            case_data=config["case_data"]
         )
-        logger.info(f"Initialized CaseInterviewAgent with case_id: {config['case_id']}")
+        logger.info(f"Initialized CaseAgent with case_id: {config['case_id']}")
     except Exception as e:
-        logger.error(f"Failed to initialize CaseInterviewAgent: {e}")
+        logger.error(f"Failed to initialize CaseAgent: {e}")
 
     # Set up a voice AI with OpenAI Realtime API
     session = AgentSession(

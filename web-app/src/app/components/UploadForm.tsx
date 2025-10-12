@@ -30,7 +30,7 @@ export default function UploadForm({ onJoinRoom }: UploadFormProps) {
     formData.append('file', file);
     
     try {
-      const response = await fetch('http://127.0.0.1:5000/upload-pdf', {
+      const response = await fetch('http://127.0.0.1:5000/upload-pdf-llm', {
         method: 'POST',
         body: formData,
       });

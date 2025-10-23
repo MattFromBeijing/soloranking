@@ -18,15 +18,16 @@ The platform allows aspiring consultants to practice case interviews in a low-pr
 ### Backend (Python/Flask)
 - **Flask** - Web framework for API endpoints and application logic
 - **OpenAI Realtime API** - Powers the conversational AI agent with real-time voice capabilities
-- **LiveKit** - Real-time communication infrastructure for voice/video sessions
+- **OpenAI Chat Completions API** - LLM-powered case structure extraction from PDF documents
 - **FAISS (Facebook AI Similarity Search)** - Vector database for efficient similarity search
 - **OpenAI Embeddings (text-embedding-3-small)** - Text vectorization for RAG pipeline
 - **PyPDF2** - PDF document processing and text extraction
+- **LiveKit** - Real-time communication infrastructure for voice/video sessions
 
 **Key Components:**
 - `CaseAgent.py` - Core AI agent implementing functional tool calling and state management
 - `RAGService.py` - RAG pipeline with 1000-character chunking, 20% overlap, and L2 normalization
-- `ExtractorService.py` & `LLMExtractorService.py` - Document processing and content extraction
+- `ExtractorService.py` & `LLMExtractorService.py` - Document processing and content extraction (LLM via OpenAI API)
 - API endpoints for case management, file uploads, and interview sessions
 
 ### Frontend (Next.js/React)
@@ -51,25 +52,34 @@ The platform implements a sophisticated RAG system featuring:
 ### Architecture Overview
 
 ```
-┌─────────────────┐    ┌──────────────────┐    ┌─────────────────┐
-│   Next.js Web   │◄──►│   Flask API      │◄──►│  OpenAI APIs    │
-│   Application   │    │   (Python)       │    │  (Realtime/     │
-│                 │    │                  │    │   Embeddings)   │
-└─────────────────┘    └──────────────────┘    └─────────────────┘
-                                │
-                                ▼
-                       ┌──────────────────┐
-                       │   FAISS Vector   │
-                       │   Store          │
-                       │   (Case Data)    │
-                       └──────────────────┘
-                                │
-                                ▼
-                       ┌──────────────────┐
-                       │   LiveKit        │
-                       │   (Real-time     │
-                       │    Communication)│
-                       └──────────────────┘
+┌─────────────────┐    PDF Upload    ┌──────────────────┐
+│   Next.js Web   │─────────────────►│   Flask API      │
+│   Application   │                  │                  │
+└─────────────────┘                  └──────────────────┘
+         ▲                                     │
+         │                                     ▼
+         │                                 PDF Content
+         │                                     │
+         │                           ┌─────────│─────────┐
+         │                           │                   │
+         │                           ▼                   ▼
+         │              ┌─────────────────┐         ┌─────────────────┐
+         │              │ ExtractorService│         │   RAGService    │
+         │              │ (LLM/Default)   │         │ (FAISS Vector   │
+         │              │ Case Structure  │         │  Store + Text   │
+         │              │   Extraction    │         │   Chunking)     │
+         │              └─────────────────┘         └─────────────────┘
+         │                       │                          │
+         │                       └─────────────┬────────────┘
+         │                                     │ 
+         │                                     ▼
+         │                          ┌──────────────────────────┐    
+         │                          │   LiveKit +              │    ┌─────────────────┐
+         │                          │   OpenAI Realtime API    │    │   CaseAgent     │
+         │                          │   (Real-time WebRTC      │◄───│  (AI Interview  │
+         └──────────────────────────┤   Communication +        │    │    Logic)       │
+              Bidirectional         │   AI Processing)         │    └─────────────────┘
+              WebRTC Audio          └──────────────────────────┘
 ```
 
 ## Getting Started
@@ -117,13 +127,10 @@ soloranking/
 ## Current Development Directions
 
 ### Multi-Agent Architecture Migration
-The platform is transitioning from a single-agent paradigm to a more sophisticated multi-agent workflow:
-
-- 🔄 **Multi-Agent Decomposition** - Exploring OpenAI's agent builder framework to replace the monolithic agent with specialized sub-agents for different interview phases and improved context extraction
+The platform is transitioning from a single-agent paradigm to a more sophisticated multi-agent workflow. We are currently exploring OpenAI's agent builder framework to replace the monolithic agent with specialized sub-agents for different interview phases and improved context extraction.
 
 ### Agent Robustness & Flow Control
-Addressing critical reliability challenges in conversational state management:
+We aim to overcome critical reliability challenges in conversational state management by strengthening state transition mechanisms and implementing stricter guardrails to ensure consistent interview progression and accurate candidate assessment.
 
-- 🎯 **Flow Control & Evaluation** - Strengthening state transition mechanisms and implementing stricter guardrails to ensure consistent interview progression and accurate candidate assessment
-
-These developments aim to create a more reliable, contextually-aware interview experience that maintains professional consulting interview standards while providing adaptive, personalized coaching.
+### Architecture refactoring
+The codebase must be refactored to isolate the livekit and agent components from the API and service components to allow agent deployment via LiveKit cloud.
